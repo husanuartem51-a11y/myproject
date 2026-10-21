@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мой Задачник</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; text-align: center; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 10px; max-width: 300px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Мини-Задачник 🧠</h2>
+        <p>Сколько будет 5 + 7?</p>
+        <input type="number" id="userAnswer" style="width: 50px; padding: 5px;">
+        <button id="checkBtn">Проверить</button>
+        <p id="result" style="font-weight: bold; margin-top: 15px;"></p>
+    </div>
+
+    <script>
+        document.getElementById('checkBtn').addEventListener('click', () => {
+            const ans = document.getElementById('userAnswer').value;
+            const res = document.getElementById('result');
+            if (parseInt(ans) === 12) {
+                res.textContent = "🎉 Правильно!";
+                res.style.color = "green";
+            } else {
+                res.textContent = "❌ Неверно!";
+                res.style.color = "red";
+            }
+        });
+    </script>
+</body>
+</html>
