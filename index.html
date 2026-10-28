@@ -8,7 +8,9 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 50px; margin: 0; }
         .card { background: #252538; padding: 30px; border-radius: 12px; max-width: 350px; margin: 0 auto; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid #45475a; }
         h2 { color: #89b4fa; margin-top: 0; }
-        .status { font-size: 18px; margin: 20px 0; font-weight: bold; color: #a6e3a1; }
+        .status { font-size: 18px; margin: 20px 0; font-weight: bold; color: #fab387; }
+        /* Новый стиль для счётчика */
+        .counter { font-size: 14px; margin-top: 15px; color: #a6adc8; border-top: 1px solid #45475a; padding-top: 15px; }
         button { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
         button:hover { background: #b4befe; }
         button.active { background: #f38ba8; color: #11111b; }
@@ -18,13 +20,19 @@
     <div class="card">
         <h2>FocusChain ⚡</h2>
         <p>Инструмент для удержания концентрации</p>
-        <div class="status" id="statusText">Статус: Отдых</div>
+        <div class="status" id="statusText">Статус: Отдых ☕</div>
         <button id="focusBtn">Начать сессию фокуса</button>
+        <!-- Новое поле счётчика сессий на экране -->
+        <div class="counter" id="counterText">Завершено сессий: 0</div>
     </div>
 
     <script>
         const button = document.getElementById('focusBtn');
         const statusText = document.getElementById('statusText');
+        const counterText = document.getElementById('counterText');
+
+        // Переменная для подсчета сессий
+        let completedSessions = 0;
 
         button.addEventListener('click', () => {
             button.classList.toggle('active');
@@ -36,8 +44,13 @@
                 button.textContent = 'Начать сессию фокуса';
                 statusText.textContent = 'Статус: Отдых ☕';
                 statusText.style.color = '#fab387';
+                
+                // Прибавляем +1 к счётчику, когда фокус завершается
+                completedSessions += 1;
+                counterText.textContent = `Завершено сессий: ${completedSessions}`;
             }
         });
     </script>
 </body>
 </html>
+
