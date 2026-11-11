@@ -5,29 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FocusChain — Трекер фокуса</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 50px; margin: 0; }
-        .card { background: #252538; padding: 30px; border-radius: 12px; max-width: 350px; margin: 0 auto; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid #45475a; }
-        h2 { color: #89b4fa; margin-top: 0; }
-        input { width: 100%; box-sizing: border-box; padding: 10px 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #45475a; background: #181825; color: #cdd6f4; font-size: 14px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 40px 16px; margin: 0; }
+        .card { background: #252538; padding: 28px; border-radius: 14px; max-width: 400px; margin: 0 auto; box-shadow: 0 8px 24px rgba(0,0,0,0.35); border: 1px solid #45475a; }
+        h2 { color: #89b4fa; margin-top: 0; margin-bottom: 6px; }
+        .subtitle { color: #a6adc8; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
+        input { width: 100%; box-sizing: border-box; padding: 11px 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #45475a; background: #181825; color: #cdd6f4; font-size: 14px; }
         input:focus { outline: none; border-color: #89b4fa; }
         input.input-error { border-color: #f38ba8; }
-        .error-box { min-height: 20px; font-size: 13px; color: #f38ba8; margin-bottom: 10px; text-align: left; }
-        .status { font-size: 18px; margin: 14px 0; font-weight: bold; color: #fab387; word-break: break-word; }
-        .counter { font-size: 14px; margin-top: 15px; color: #a6adc8; border-top: 1px solid #45475a; padding-top: 15px; }
-        button { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; width: 100%; }
-        button:hover { background: #b4befe; }
-        button.active { background: #f38ba8; color: #11111b; }
+        .error-box { min-height: 18px; font-size: 13px; color: #f38ba8; margin-bottom: 10px; text-align: left; }
+        .status { font-size: 17px; margin: 12px 0 4px; font-weight: bold; color: #fab387; word-break: break-word; }
+        .timer { font-size: 28px; font-weight: bold; font-variant-numeric: tabular-nums; color: #cdd6f4; margin: 8px 0 16px; }
+        .btn-main { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; width: 100%; }
+        .btn-main:hover { background: #b4befe; }
+        .btn-main.active { background: #f38ba8; color: #11111b; }
+        .stats-bar { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-top: 18px; color: #a6adc8; border-top: 1px solid #45475a; padding-top: 14px; }
+        .btn-reset { background: transparent; color: #f38ba8; border: 1px solid #45475a; padding: 5px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; }
+        .btn-reset:hover { background: #313244; }
+        .history { margin-top: 16px; text-align: left; }
+        .history-title { font-size: 13px; color: #a6adc8; margin-bottom: 8px; }
+        .history-list { list-style: none; padding: 0; margin: 0; max-height: 160px; overflow-y: auto; }
+        .history-item { background: #181825; border: 1px solid #313244; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .history-goal { color: #cdd6f4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .history-meta { color: #a6e3a1; font-size: 12px; white-space: nowrap; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>FocusChain ⚡</h2>
-        <p>Инструмент для удержания концентрации</p>
+        <p class="subtitle">Трекер концентрации и истории сессий</p>
+
         <input type="text" id="goalInput" placeholder="Введите цель сессии (до 50 симв.)..." />
         <div class="error-box" id="errorBox" role="alert"></div>
+
         <div class="status" id="statusText">Статус: Отдых ☕</div>
-        <button id="focusBtn">Начать сессию фокуса</button>
-        <div class="counter" id="counterText">Завершено сессий: 0</div>
+        <div class="timer" id="timerText">00:00</div>
+
+        <button class="btn-main" id="focusBtn">Начать сессию фокуса</button>
+
+        <div class="stats-bar">
+            <span id="counterText">Завершено сессий: 0</span>
+            <button class="btn-reset" id="resetBtn" title="Очистить историю и счётчик">Сбросить</button>
+        </div>
+
+        <div class="history" id="historySection" style="display: none;">
+            <div class="history-title">Последние завершённые сессии:</div>
+            <ul class="history-list" id="historyList"></ul>
+        </div>
     </div>
 
     <script>
@@ -35,16 +58,30 @@
         const MAX_GOAL_LENGTH = 50;
 
         const button = document.getElementById('focusBtn');
+        const resetBtn = document.getElementById('resetBtn');
         const statusText = document.getElementById('statusText');
+        const timerText = document.getElementById('timerText');
         const counterText = document.getElementById('counterText');
         const goalInput = document.getElementById('goalInput');
         const errorBox = document.getElementById('errorBox');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+
+        let timerInterval = null;
 
         let state = {
             completedSessions: 0,
             isFocusing: false,
-            goal: ''
+            goal: '',
+            startTime: null,
+            history: []
         };
+
+        function formatDuration(totalSeconds) {
+            const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const secs = String(totalSeconds % 60).padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
 
         function showError(message) {
             errorBox.textContent = message;
@@ -70,18 +107,21 @@
                     && parsed.completedSessions >= 0;
                 const isValidFlag = typeof parsed.isFocusing === 'boolean';
                 const isValidGoal = typeof parsed.goal === 'string';
+                const isValidHistory = Array.isArray(parsed.history);
 
-                if (!isValidCount || !isValidFlag || !isValidGoal) {
+                if (!isValidCount || !isValidFlag || !isValidGoal || !isValidHistory) {
                     throw new Error('Некорректная структура сохранённых данных');
                 }
 
                 state = {
                     completedSessions: parsed.completedSessions,
                     isFocusing: parsed.isFocusing,
-                    goal: parsed.goal
+                    goal: parsed.goal,
+                    startTime: typeof parsed.startTime === 'number' ? parsed.startTime : null,
+                    history: parsed.history
                 };
             } catch (err) {
-                state = { completedSessions: 0, isFocusing: false, goal: '' };
+                state = { completedSessions: 0, isFocusing: false, goal: '', startTime: null, history: [] };
                 saveState();
                 showError('Ошибка чтения сохранения: повреждённые данные сброшены.');
             }
@@ -108,9 +148,59 @@
             return { ok: true, value: trimmed };
         }
 
+        function updateTimerDisplay() {
+            if (!state.isFocusing || !state.startTime) {
+                timerText.textContent = '00:00';
+                return;
+            }
+            const elapsedSeconds = Math.max(0, Math.floor((Date.now() - state.startTime) / 1000));
+            timerText.textContent = formatDuration(elapsedSeconds);
+        }
+
+        function startTimerLoop() {
+            stopTimerLoop();
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopTimerLoop() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function renderHistory() {
+            if (state.history.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+
+            historySection.style.display = 'block';
+            historyList.innerHTML = '';
+
+            state.history.slice(0, 10).forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+
+                const goalSpan = document.createElement('span');
+                goalSpan.className = 'history-goal';
+                goalSpan.textContent = item.goal;
+
+                const metaSpan = document.createElement('span');
+                metaSpan.className = 'history-meta';
+                metaSpan.textContent = `${item.duration} • ${item.finishedAt}`;
+
+                li.appendChild(goalSpan);
+                li.appendChild(metaSpan);
+                historyList.appendChild(li);
+            });
+        }
+
         function render() {
             goalInput.value = state.goal;
             counterText.textContent = `Завершено сессий: ${state.completedSessions}`;
+            renderHistory();
 
             if (state.isFocusing) {
                 button.classList.add('active');
@@ -118,41 +208,15 @@
                 statusText.textContent = `В фокусе: ${state.goal} 🎯`;
                 statusText.style.color = '#a6e3a1';
                 goalInput.disabled = true;
+                startTimerLoop();
             } else {
                 button.classList.remove('active');
                 button.textContent = 'Начать сессию фокуса';
                 statusText.textContent = 'Статус: Отдых ☕';
                 statusText.style.color = '#fab387';
                 goalInput.disabled = false;
+                stopTimerLoop();
+                timerText.textContent = '00:00';
             }
         }
 
-        goalInput.addEventListener('input', () => {
-            if (errorBox.textContent) {
-                clearError();
-            }
-        });
-
-        button.addEventListener('click', () => {
-            if (!state.isFocusing) {
-                const validation = validateGoal(goalInput.value);
-                if (!validation.ok) {
-                    showError(validation.error);
-                    return;
-                }
-                clearError();
-                state.goal = validation.value;
-                state.isFocusing = true;
-            } else {
-                clearError();
-                state.isFocusing = false;
-                state.completedSessions += 1;
-            }
-            saveState();
-            render();
-        });
-
-        loadState();
-    </script>
-</body>
-</html>
