@@ -8,8 +8,11 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 50px; margin: 0; }
         .card { background: #252538; padding: 30px; border-radius: 12px; max-width: 350px; margin: 0 auto; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid #45475a; }
         h2 { color: #89b4fa; margin-top: 0; }
-        .status { font-size: 18px; margin: 20px 0; font-weight: bold; color: #a6e3a1; }
-        button { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        input { width: 100%; box-sizing: border-box; padding: 10px 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #45475a; background: #181825; color: #cdd6f4; font-size: 14px; }
+        input:focus { outline: none; border-color: #89b4fa; }
+        .status { font-size: 18px; margin: 16px 0; font-weight: bold; color: #fab387; }
+        .counter { font-size: 14px; margin-top: 15px; color: #a6adc8; border-top: 1px solid #45475a; padding-top: 15px; }
+        button { background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; width: 100%; }
         button:hover { background: #b4befe; }
         button.active { background: #f38ba8; color: #11111b; }
     </style>
@@ -18,26 +21,70 @@
     <div class="card">
         <h2>FocusChain ⚡</h2>
         <p>Инструмент для удержания концентрации</p>
-        <div class="status" id="statusText">Статус: Отдых</div>
+        <input type="text" id="goalInput" placeholder="Введите цель сессии..." />
+        <div class="status" id="statusText">Статус: Отдых ☕</div>
         <button id="focusBtn">Начать сессию фокуса</button>
+        <div class="counter" id="counterText">Завершено сессий: 0</div>
     </div>
 
     <script>
+        const STORAGE_KEY = 'focusChainState';
+
         const button = document.getElementById('focusBtn');
         const statusText = document.getElementById('statusText');
+        const counterText = document.getElementById('counterText');
+        const goalInput = document.getElementById('goalInput');
 
-        button.addEventListener('click', () => {
-            button.classList.toggle('active');
-            if (button.classList.contains('active')) {
+        let state = {
+            completedSessions: 0,
+            isFocusing: false,
+            goal: ''
+        };
+
+        function loadState() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                state = JSON.parse(raw);
+            }
+            render();
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function render() {
+            goalInput.value = state.goal;
+            counterText.textContent = `Завершено сессий: ${state.completedSessions}`;
+
+            if (state.isFocusing) {
+                button.classList.add('active');
                 button.textContent = 'Завершить фокус';
-                statusText.textContent = 'Статус: В фокусе! 🎯';
+                statusText.textContent = `В фокусе: ${state.goal} 🎯`;
                 statusText.style.color = '#a6e3a1';
+                goalInput.disabled = true;
             } else {
+                button.classList.remove('active');
                 button.textContent = 'Начать сессию фокуса';
                 statusText.textContent = 'Статус: Отдых ☕';
                 statusText.style.color = '#fab387';
+                goalInput.disabled = false;
             }
+        }
+
+        button.addEventListener('click', () => {
+            if (!state.isFocusing) {
+                state.goal = goalInput.value;
+                state.isFocusing = true;
+            } else {
+                state.isFocusing = false;
+                state.completedSessions += 1;
+            }
+            saveState();
+            render();
         });
+
+        loadState();
     </script>
 </body>
 </html>
