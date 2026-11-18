@@ -27,7 +27,7 @@
 <body>
     <div class="card">
         <h2>FocusChain ⚡</h2>
-        <p class="subtitle">Трекер концентрации 2</p>
+        <p class="subtitle">Трекер концентрации и фокуса</p>
         <input type="text" id="goalInput" placeholder="Введите цель сессии (до 50 симв.)..." />
         <div class="error-box" id="errorBox"></div>
         <div class="status" id="statusText">Статус: Отдых ☕</div>
@@ -168,5 +168,17 @@
 
         load();
     </script>
+    <button id="export-btn" style="margin-top: 10px;">Экспорт статистики</button>
+<script>
+  function downloadStats(content) {
+    const file = new Blob([content], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(file);
+    link.download = 'focus-stats.txt';
+    link.click();
+  }
+
+  document.getElementById('export-btn').onclick = () => downloadStats(document.body.innerText);
+</script>
 </body>
 </html>
