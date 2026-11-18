@@ -168,5 +168,15 @@
 
         load();
     </script>
+    <button id="export-btn" style="margin-top: 10px;">Экспорт статистики</button>
+<script>
+  document.getElementById('export-btn').onclick = () => {
+    const text = document.body.innerText;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    a.download = 'focus-stats.txt';
+    a.click();
+  };
+</script>
 </body>
 </html>
